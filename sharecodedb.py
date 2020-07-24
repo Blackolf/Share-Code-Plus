@@ -3,8 +3,8 @@
 from flask import Flask, request, render_template, \
                   redirect
 
-from model import save_doc_as_file, \
-                  read_doc_as_file, \
+from model_squlite import Insert_into_db, \
+                  SELECT_form_db, \
                   get_last_entries_from_files
 
 app = Flask(__name__)
@@ -17,12 +17,12 @@ def index():
 
 @app.route('/create')
 def create():
-    uid = save_doc_as_file()
+    uid = Insert_into_db()
     return redirect("{}edit/{}".format(request.host_url,uid))
     
 @app.route('/edit/<string:uid>/')
 def edit(uid):
-    code = read_doc_as_file(uid)
+    code = SELECT_form_db(uid)
     if code is None:
         return render_template('error.html',uid=uid)
     d = dict( uid=uid, code=code,
@@ -33,14 +33,14 @@ def edit(uid):
 def publish():
     code = request.form['code']
     uid  = request.form['uid']
-    save_doc_as_file(uid,code)
+    Insert_into_db(uid,code)
     return redirect("{}{}/{}".format(request.host_url,
                                      request.form['submit'],
                                      uid))
 
 @app.route('/view/<string:uid>/')
 def view(uid):
-    code = read_doc_as_file(uid)
+    code = SELECT_form_db(uid)
     if code is None:
         return render_template('error.html',uid=uid)
     d = dict( uid=uid, code=code,
