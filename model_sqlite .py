@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import sqlite3 # pour PostgreSQL : psycopg2
+ # pour MySQL/MariaDB : MysqlDB ou pymysql
+
+
 from string import ascii_letters, digits
 from itertools import chain
 from random import choice
@@ -12,23 +16,26 @@ def create_uid(n=9):
                         if c not in '0OIl'  ]
    return ''.join( ( choice(chrs) for i in range(n) ) ) 
 
-def save_doc_as_file(uid=None,code=None):
-    '''Crée/Enregistre le document sous la forme d'un fichier
-    data/uid. Return the file name.
+def Insert_into_db(uid=None,code=None,language=None):
+    '''Crée/Enregistre le document dans le db. Return the file name.
     '''
     if uid is None:
         uid = create_uid()
         code = '# Write your code here...'
-    with open('data/{}'.format(uid),'w') as fd:
-        fd.write(code)
+
+    with sqlite3.connect('script.sqlite3') as conn:
+        curs = conn.cursor()
+        curs.execute('INSERT INTO script VALUES (?,?,?)',(uid,code,language))
+        conn.commit()
+        
     return uid
 
-def read_doc_as_file(uid):
+def SELECT_form_db(uid):
     '''Lit le document data/uid'''
     try:
-        with open('data/{}'.format(uid)) as fd:
-            code = fd.read()
-        return code
+        with sqlite3.connect('script.sqlite3') as conn:
+            curs = conn.cursor()
+            curs.execute('SELECT * FROM script WHERE uid = ?',(uid))
     except FileNotFoundError:
         return None
 

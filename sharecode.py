@@ -2,7 +2,10 @@
 
 from flask import Flask, request, render_template, \
                   redirect
-from model_sqlite import createTables
+
+from model import save_doc_as_file, \
+                  read_doc_as_file, \
+                  get_last_entries_from_files
 
 app = Flask(__name__)
 
